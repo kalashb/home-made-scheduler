@@ -77,7 +77,7 @@ def plot_graph(csv_file, output_file="timings.png"):
     plt.figure(figsize=(10, 6))
     plt.bar(labels, averages, color=['#4CAF50', '#2196F3'])
     plt.ylabel('Time (ms)')
-    plt.title('Average Response Times')
+    plt.title('Performance Metrics')
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     plt.savefig(output_file, dpi=150)

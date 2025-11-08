@@ -40,7 +40,10 @@ The server automatically logs all timing data to `timings.csv`. To visualize:
    ```
    python3 visualize.py
    ```
-
+Expected result:
+timing.png:
+<img width="1500" height="900" alt="image" src="https://github.com/user-attachments/assets/803e4cc2-dfe0-4dc0-b7a9-e84324211667" />
+terminal:
 <img width="874" height="526" alt="image" src="https://github.com/user-attachments/assets/eab1b512-00bb-4f94-a2db-8943c7dd8a6b" />
 
 ## why am i making this
