@@ -42,7 +42,7 @@ The server automatically logs all timing data to `timings.csv`. To visualize:
    ```
 Expected result:
 timing.png:
-<img width="1500" height="900" alt="image" src="https://github.com/user-attachments/assets/803e4cc2-dfe0-4dc0-b7a9-e84324211667" />
+<img width="1500" height="900" alt="image" src="https://github.com/user-attachments/assets/af7d2f98-8426-483c-ad5b-d59179fb69df" />
 terminal:
 <img width="874" height="526" alt="image" src="https://github.com/user-attachments/assets/eab1b512-00bb-4f94-a2db-8943c7dd8a6b" />
 
