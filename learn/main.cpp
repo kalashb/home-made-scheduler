@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <fstream>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -17,18 +18,40 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+// CSV logging helper
+namespace {
+std::mutex csv_mutex_;
+bool csv_header_written_ = false;
+
+void writeToCSV(const std::string& label, double ms) {
+  std::lock_guard<std::mutex> lock(csv_mutex_);
+  std::ofstream file("timings.csv", std::ios::out | std::ios::app);
+  if (file.is_open()) {
+    if (!csv_header_written_) {
+      file << "label,time_ms\n";
+      csv_header_written_ = true;
+      std::cout << "[CSV] Created timings.csv\n";
+    }
+    file << label << "," << ms << "\n";
+    file.close();
+  } else {
+    std::cerr << "[CSV] ERROR: Failed to open timings.csv\n";
+  }
+}
+}  // namespace
+
 struct ScopedTimer {
   std::string label;
   std::chrono::high_resolution_clock::time_point t0;
+
   explicit ScopedTimer(std::string l)
-      : label(std::move(l)),
-        t0(std::chrono::high_resolution_clock::now()) {
-  }  // constructor: explicitly move the label string into the class
+      : label(std::move(l)), t0(std::chrono::high_resolution_clock::now()) {}
 
   ~ScopedTimer() {  // destructor
     auto t1 = std::chrono::high_resolution_clock::now();
     double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
     std::cout << label << " took " << ms << " ms\n";
+    writeToCSV(label, ms);
   }
 };
 
