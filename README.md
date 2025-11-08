@@ -41,8 +41,9 @@ The server automatically logs all timing data to `timings.csv`. To visualize:
    python3 visualize.py
    ```
 Expected result:
-timing.png:
-<img width="1500" height="900" alt="image" src="https://github.com/user-attachments/assets/af7d2f98-8426-483c-ad5b-d59179fb69df" />
+timing.png: makes sense because it's a small tasks with not much scheduling but also makes code not useful because no real benefit
+<img width="2084" height="1152" alt="image" src="https://github.com/user-attachments/assets/aca6490a-ff2c-4517-98ed-eab77ffb297b" />
+
 terminal:
 <img width="874" height="526" alt="image" src="https://github.com/user-attachments/assets/eab1b512-00bb-4f94-a2db-8943c7dd8a6b" />
 
