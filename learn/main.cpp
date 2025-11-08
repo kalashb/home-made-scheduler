@@ -88,7 +88,10 @@ class GreeterServiceImpl final : public demo::Greeter::Service {
         std::cout << "[worker] Processing task for: " << dodo.name << "\n";
         {
           ScopedTimer t("worker task");
-          // (simulate work) build the reply message
+          // Simulate actual work (e.g., processing, computation, I/O)
+          // For demo: add a small delay to simulate real work
+          std::this_thread::sleep_for(
+              std::chrono::microseconds(100));  // 0.1ms work
           std::string output = "Hello, " + dodo.name + "!";
           dodo.prom.set_value(std::move(output));
         }
@@ -109,6 +112,17 @@ class GreeterServiceImpl final : public demo::Greeter::Service {
   Status SayHello(ServerContext*, const demo::HelloRequest* req,
                   demo::HelloReply* rep) override {
     ScopedTimer timer("end-to-end RPC");
+
+    // Measure direct processing (what it would take without scheduler)
+    {
+      ScopedTimer direct_timer("direct processing");
+      // Simulate same work as worker (for fair comparison)
+      std::this_thread::sleep_for(
+          std::chrono::microseconds(100));  // 0.1ms work
+      std::string direct_result = "Hello, " + req->name() + "!";
+      // This simulates doing the work directly without scheduler
+    }
+
     // create a task + future
     Task dododo;
     dododo.name = req->name();
