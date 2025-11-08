@@ -25,3 +25,7 @@ add_custom_command(
 add_executable(server main.cpp ${PROTO_SRC} ${GRPC_SRC})
 target_include_directories(server PRIVATE ${GEN_DIR})
 target_link_libraries(server PRIVATE gRPC::grpc++ protobuf::libprotobuf)
+
+add_executable(client client.cpp ${PROTO_SRC} ${GRPC_SRC})
+target_include_directories(client PRIVATE ${GEN_DIR})
+target_link_libraries(client PRIVATE gRPC::grpc++ protobuf::libprotobuf)
