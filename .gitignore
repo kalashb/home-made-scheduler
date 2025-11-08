@@ -62,3 +62,7 @@ out/
 # Executables (without extension)
 server
 client
+
+# Performance data
+timings.csv
+timings.png

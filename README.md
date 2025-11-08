@@ -22,6 +22,23 @@ end-to-end RPC took 0.11 ms
 expected client output:
 Hello, TPU-monster!
 
+## performance visualization
+
+The server automatically logs all timing data to `timings.csv`. To visualize:
+   ```
+   cd learn
+   ./server
+   ```
+   ```
+   cd learn
+   ./benchmark.sh
+   ```
+   ```
+   python3 visualize.py
+   ```
+
+<img width="874" height="526" alt="image" src="https://github.com/user-attachments/assets/eab1b512-00bb-4f94-a2db-8943c7dd8a6b" />
+
 ## why am i making this
 I realized cpp/application is much more than what I've explored so far and I want to get into it as soon as I can. Here I've tried to learn to
 1. set up gRPC + how to structure a proto file
@@ -32,6 +49,6 @@ I realized cpp/application is much more than what I've explored so far and I wan
 
 ## more soon?
 I think I could implement round robin much better than how I have previously if I use these, probably task for tomorrow.
-I would really like to visualize/graph performance timings. I want to put all timings in a csv and graph them.
+✅ Performance visualization with CSV logging and graphs (done!)
 gRPC streaming API? inference runtime experiment? 
 

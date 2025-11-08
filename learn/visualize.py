@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# this file is AI generated
+
 """Simple visualization script for timing data"""
 import csv
 import sys
