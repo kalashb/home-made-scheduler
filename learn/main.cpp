@@ -1,5 +1,6 @@
 #include <grpcpp/grpcpp.h>
 
+#include <chrono>
 #include <condition_variable>
 #include <functional>
 #include <future>
@@ -16,83 +17,111 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+struct ScopedTimer {
+  std::string label;
+  std::chrono::high_resolution_clock::time_point t0;
+  explicit ScopedTimer(std::string l)
+      : label(std::move(l)),
+        t0(std::chrono::high_resolution_clock::now()) {
+  }  // constructor: explicitly move the label string into the class
+
+  ~ScopedTimer() {  // destructor
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+    std::cout << label << " took " << ms << " ms\n";
+  }
+};
+
 struct Task {
   std::string name;
-  std::promise<std::string> prom;  // worker sets this (promise to set the value)
+  std::promise<std::string>
+      prom;  // worker sets this (promise to set the value)
 };
 
 class GreeterServiceImpl final : public demo::Greeter::Service {
-  public:
-    GreeterServiceImpl() : stop_(false) {
-      worker_ = std::thread([this] { 
-        // add logging to see when the worker starts and stops + debug
-        std::cout << "[worker] Background worker started\n";
-        for (;;) {
-          Task dodo; 
-          {
-            std::unique_lock<std::mutex> lock(m_); // lock the mutex (wait for the condition variable to be signaled) 
-            cv_.wait(lock, [this] { return stop_ || !q_.empty(); }); // wait for the condition variable (cv_) to be signaled - remember protected variables are named with a _
-            if (stop_ && q_.empty()) {
-              std::cout << "[worker] Background worker stopping\n";
-              return;
-            }
-            dodo = std::move(q_.front()); 
-            q_.pop();
+ public:
+  GreeterServiceImpl() : stop_(false) {
+    worker_ = std::thread([this] {
+      // add logging to see when the worker starts and stops + debug
+      std::cout << "[worker] Background worker started\n";
+      for (;;) {
+        Task dodo;
+        {
+          std::unique_lock<std::mutex> lock(
+              m_);  // lock the mutex (wait for the condition variable to be
+                    // signaled)
+          cv_.wait(lock, [this] {
+            return stop_ || !q_.empty();
+          });  // wait for the condition variable (cv_) to be signaled -
+               // remember protected variables are named with a _
+          if (stop_ && q_.empty()) {
+            std::cout << "[worker] Background worker stopping\n";
+            return;
           }
+          dodo = std::move(q_.front());
+          q_.pop();
+        }
 
-          std::cout << "[worker] Processing task for: " << dodo.name << "\n";
+        std::cout << "[worker] Processing task for: " << dodo.name << "\n";
+        {
+          ScopedTimer t("worker task");
           // (simulate work) build the reply message
           std::string output = "Hello, " + dodo.name + "!";
           dodo.prom.set_value(std::move(output));
-          std::cout << "[worker] Finished processing: " << dodo.name << "\n";
         }
-      });
-    }
-
-    ~GreeterServiceImpl() override { // destructor
-      {
-        std::lock_guard<std::mutex> lk(m_);
-        stop_ = true;
+        std::cout << "[worker] Finished processing: " << dodo.name << "\n";
       }
-      cv_.notify_all(); // notify all waiting threads
-      if (worker_.joinable()) worker_.join();
-    }
-
-    Status SayHello(ServerContext*, const demo::HelloRequest* req, demo::HelloReply* rep) override {
-      // create a task + future
-      Task dododo;
-      dododo.name = req->name();
-      auto fut = dododo.prom.get_future();
-
-      // enqueue
-      {
-        std::lock_guard<std::mutex> lk(m_); 
-        q_.push(std::move(dododo));
-        std::cout << "[server] Enqueued task for: " << req->name() << "\n";
-      }
-      cv_.notify_one();
-
-      // wait for background worker to finish
-      std::cout << "[server] Waiting for worker to process: " << req->name() << "\n";
-      std::string out = fut.get();
-      rep->set_message(std::move(out));
-      std::cout << "[server] Response sent for: " << req->name() << "\n";
-      return Status::OK;
+    });
   }
 
-  private:
-    std::mutex m_; 
-    std::condition_variable cv_; 
-    std::queue<Task> q_;
-    std::thread worker_; 
-    bool stop_; // flag to stop the background worker
+  ~GreeterServiceImpl() override {  // destructor
+    {
+      std::lock_guard<std::mutex> lk(m_);
+      stop_ = true;
+    }
+    cv_.notify_all();  // notify all waiting threads
+    if (worker_.joinable()) worker_.join();
+  }
+
+  Status SayHello(ServerContext*, const demo::HelloRequest* req,
+                  demo::HelloReply* rep) override {
+    ScopedTimer timer("end-to-end RPC");
+    // create a task + future
+    Task dododo;
+    dododo.name = req->name();
+    auto fut = dododo.prom.get_future();
+
+    // enqueue
+    {
+      std::lock_guard<std::mutex> lk(m_);
+      q_.push(std::move(dododo));
+      std::cout << "[server] Enqueued task for: " << req->name() << "\n";
+    }
+    cv_.notify_one();
+
+    // wait for background worker to finish
+    std::cout << "[server] Waiting for worker to process: " << req->name()
+              << "\n";
+    std::string out = fut.get();
+    rep->set_message(std::move(out));
+    std::cout << "[server] Response sent for: " << req->name() << "\n";
+    return Status::OK;
+  }
+
+ private:
+  std::mutex m_;
+  std::condition_variable cv_;
+  std::queue<Task> q_;
+  std::thread worker_;
+  bool stop_;  // flag to stop the background worker
 };
 
 int main() {
-  GreeterServiceImpl welcome; //service 
+  GreeterServiceImpl welcome;  // service
 
   ServerBuilder bob_builder;
-  bob_builder.AddListeningPort("0.0.0.0:50051", grpc::InsecureServerCredentials());
+  bob_builder.AddListeningPort("0.0.0.0:50051",
+                               grpc::InsecureServerCredentials());
   bob_builder.RegisterService(&welcome);
 
   std::unique_ptr<Server> server(bob_builder.BuildAndStart());
