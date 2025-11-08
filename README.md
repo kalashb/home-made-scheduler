@@ -8,7 +8,8 @@ make -j
 ```
 and run `./server` and in different terminal run `./client <TPU-monster>`
 
-expected server output:
+**expected server output:**
+```
 Server running on 0.0.0.0:50051
 [worker] Background worker started
 [server] Enqueued task for: TPU-monster
@@ -18,9 +19,12 @@ worker task took 0.02 ms
 [worker] Finished processing: TPU-monster
 end-to-end RPC took 0.11 ms
 [server] Response sent for: TPU-monster
+```
 
-expected client output:
+**expected client output:**
+```
 Hello, TPU-monster!
+```
 
 ## performance visualization
 
