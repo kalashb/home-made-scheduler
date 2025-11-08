@@ -1,3 +1,0 @@
-/Users/kalashbhaiya/Desktop/programming projects/GitHub/home-made-scheduler/learn/CMakeFiles/server.dir
-/Users/kalashbhaiya/Desktop/programming projects/GitHub/home-made-scheduler/learn/CMakeFiles/edit_cache.dir
-/Users/kalashbhaiya/Desktop/programming projects/GitHub/home-made-scheduler/learn/CMakeFiles/rebuild_cache.dir
