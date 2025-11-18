@@ -71,12 +71,10 @@ class GreeterServiceImpl final : public demo::Greeter::Service {
         Task dodo;
         {
           std::unique_lock<std::mutex> lock(
-              m_);  // lock the mutex (wait for the condition variable to be
-                    // signaled)
+              m_);  // lock the mutex (wait for the condition variable to be signaled)
           cv_.wait(lock, [this] {
             return stop_ || !q_.empty();
-          });  // wait for the condition variable (cv_) to be signaled -
-               // remember protected variables are named with a _
+          });  // wait for the condition variable (cv_) to be signaled - remember protected variables are named with a _
           if (stop_ && q_.empty()) {
             std::cout << "[worker] Background worker stopping\n";
             return;
@@ -88,8 +86,6 @@ class GreeterServiceImpl final : public demo::Greeter::Service {
         std::cout << "[worker] Processing task for: " << dodo.name << "\n";
         {
           ScopedTimer t("worker task");
-          // Simulate actual work (e.g., processing, computation, I/O)
-          // For demo: add a small delay to simulate real work
           std::this_thread::sleep_for(
               std::chrono::microseconds(100));  // 0.1ms work
           std::string output = "Hello, " + dodo.name + "!";
@@ -113,14 +109,11 @@ class GreeterServiceImpl final : public demo::Greeter::Service {
                   demo::HelloReply* rep) override {
     ScopedTimer timer("end-to-end RPC");
 
-    // Measure direct processing (what it would take without scheduler)
     {
       ScopedTimer direct_timer("direct processing");
-      // Simulate same work as worker (for fair comparison)
       std::this_thread::sleep_for(
           std::chrono::microseconds(100));  // 0.1ms work
       std::string direct_result = "Hello, " + req->name() + "!";
-      // This simulates doing the work directly without scheduler
     }
 
     // create a task + future

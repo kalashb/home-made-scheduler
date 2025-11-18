@@ -41,7 +41,7 @@ The server automatically logs all timing data to `timings.csv`. To visualize:
    python3 visualize.py
    ```
 Expected result:
-timing.png: makes sense because it's a small tasks with not much scheduling but also makes code not useful because no real benefit
+timing.png: makes sense because it's a small tasks so comparatively, the overhead seems huge. But for real tasks benefits outweigh the costs: task queueing, resource control, fairness, scalability.
 <img width="2084" height="1152" alt="image" src="https://github.com/user-attachments/assets/aca6490a-ff2c-4517-98ed-eab77ffb297b" />
 
 terminal:
